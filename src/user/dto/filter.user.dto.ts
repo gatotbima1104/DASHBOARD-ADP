@@ -1,3 +1,3 @@
 export class FilterUserDto{
-  position: string
+  role: string
 }

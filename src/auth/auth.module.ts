@@ -16,7 +16,7 @@ import { RolesGuard } from './guard/role.guard';
     TypeOrmModule.forFeature([User]),
     JwtModule.register({
       global: true,
-      secret: jwtConstants.secret,
+      secret: `$process.env.jwt_secret`,
       signOptions: { expiresIn: '1h' },
     }),
   ],

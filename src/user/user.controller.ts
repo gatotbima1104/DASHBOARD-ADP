@@ -20,70 +20,92 @@ import { FilterUserDto } from './dto/filter.user.dto';
 import { Roles } from 'src/auth/role/roles.decorator';
 import { Role } from 'src/auth/role/roles.enum';
 import { v4 as uuidv4 } from 'uuid';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 
 
+// save file into storage
 export const storage = {
-    storage: diskStorage({
+  storage: diskStorage({
     destination: './uploads',
     filename: (req, file, cb) => {
       const filename: string = path.parse(file.originalname).name.replace(/\s/g, '') + uuidv4()
       const extention: string = path.parse(file.originalname).ext
 
       cb(null, `${filename}${extention}`)
-    }  
+    }
   })
 }
 
+@ApiTags('user')
+@ApiBearerAuth()
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  // create user
   @Post()
-  @UseInterceptors(
-    FileInterceptor('photo', {
-      dest: './uploads'
-    }),
-  )
+  @Roles(Role.Admin)
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        name: { type: 'string' },
+        email: { type: 'email' },
+        password: {type: 'password'},
+        confirmPassword: {type: 'password'},
+        profilePicture: {
+          type: 'string',
+          format: 'binary',
+        },
+      }
+    }
+  })
+  @UseInterceptors(FileInterceptor('profilePicture', storage))
   createUser(
-    @Body() dto: CreateUserDto,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
+    @Body() dto: CreateUserDto, @UploadedFile() file: Express.Multer.File) {
     return this.userService.createUser(dto, file);
   }
 
-  // @Post('upload')
-  // @UseInterceptors(FileInterceptor('photo', {dest: './uploads'}))
-  // uploadFile(@UploadedFile() file){
-  //   console.log(file)
-  // }
-
-  // @Get()
-  // getUsers(@Query('pos') filter: FilterUserDto) {
-  //   console.log(filter)
-
-  //   if(Object.keys(filter).length > 0){
-  //     return this.userService.getUserByFilter(filter)
-  //   }else{
-  //     return this.userService.getUsers();
-  //   } 
-  // }
+  //filter by role
   @Get()
-  @Roles(Role.Admin)
-  getUsers(){
-    return this.userService.getUsers();
+  getUsers(@Query('role') filter: FilterUserDto){
+    if(filter){
+      return this.userService.getUserByFilter(filter)
+    }else{
+      return this.userService.getUsers()
+    }
   }
 
+  // get by id
   @Get(':id')
   getUsersById(@Param('id') id: string) {
     return this.userService.getUser(id);
   }
 
   @Patch(':id')
-  updateUser(@Param('id') id: string, @Body() dto: EditUserDto) {
-    return this.userService.editUserById(id, dto);
+  @Roles(Role.Admin)
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        name: { type: 'string' },
+        email: { type: 'email' },
+        profilePicture: {
+          type: 'string',
+          format: 'binary',
+        },
+      }
+    }
+  })
+  @UseInterceptors(FileInterceptor('profilePicture', storage))
+  updateUser(@Param('id') id: string, @Body() dto: EditUserDto, @UploadedFile() file: Express.Multer.File) {
+    return this.userService.editUserById(id, dto, file);
   }
 
   @Delete(':id')
+  @Roles(Role.Admin)
   removeUser(@Param('id') id: string) {
     return this.userService.removeUserById(id);
   }

@@ -13,22 +13,6 @@ export class UserService {
     @InjectRepository(User) private userRepo: Repository<User>
   ){}
 
-   // async uplaodImage(dto: FileDto){
-  //   // Generate a unique filename for the profile picture using a timestamp
-  //   const timestamp = new Date().getTime();
-  //   const profilePictureFilename = `${dto.profilePicture.originalname}`;
-
-  //   // Specify the destination directory for the profile pictures
-  //   const uploadPath = './uploads/';
-
-  //   // Save the profile picture to the specified location
-  //   try {
-  //     fs.writeFileSync(uploadPath + profilePictureFilename, dto.profilePicture.buffer);
-  //   } catch (error) {
-  //     throw new BadRequestException('Failed to save profile picture');
-  //   }
-  // }
-
   async createUser(dto: CreateUserDto, file: Express.Multer.File){
     const user = await this.userRepo.findOne({ 
       where: {
@@ -91,11 +75,15 @@ export class UserService {
   }
 
   // done
-  async editUserById(id: string, dto: EditUserDto){
+  async editUserById(id: string, dto: EditUserDto, file: Express.Multer.File){
     const oldUser = await this.findUserById(id)
+
+    const profilePicture = file? file.originalname : null;
+
     await this.userRepo.update(id, {
       ...oldUser,
       ...dto,
+      profilePicture: profilePicture,
     })
 
     const updatedUser = await this.userRepo.findOneBy({id})
@@ -108,7 +96,7 @@ export class UserService {
   // done
   async removeUserById(id: string){
     const user = await this.userRepo.delete(id)
-    if(!user){
+    if(user.affected == 0){
       throw new HttpException(
         {
           statusCode: HttpStatus.NOT_FOUND,
@@ -123,7 +111,7 @@ export class UserService {
 
   // find user by Id
   async findUserById(id: string){
-    const user = await this.userRepo.findOneBy({id})  
+    const user = await this.userRepo.findOneBy({id}) 
     if (!user) {
       throw new HttpException(
         {
@@ -136,17 +124,18 @@ export class UserService {
     return user
   }
 
+  // filter user
   async getUserByFilter(filter: FilterUserDto){
     const builder = await this.userRepo.createQueryBuilder('user')
       .select('user')
-      .where('user.position = :position', {position: filter})
+      .where('user.role = :role', {role: filter})
       .getMany()
 
       if(!builder){
         throw new HttpException(
           {
             statusCode: HttpStatus.NOT_FOUND,
-            message: 'position not found'
+            message: 'role not found'
           },
           HttpStatus.NOT_FOUND,
         );

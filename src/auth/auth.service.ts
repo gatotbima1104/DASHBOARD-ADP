@@ -62,6 +62,8 @@ export class AuthService {
     const token = this.jwtService.sign(payload);
 
     await this.userRepo.save(newUser);
+
+    delete newUser.password;
     return {
       newUser,
       message: 'user registered successfully',
