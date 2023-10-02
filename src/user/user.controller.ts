@@ -16,11 +16,10 @@ import { EditUserDto } from './dto/update.user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import path = require('path')
-import { FilterUserDto } from './dto/filter.user.dto';
 import { Roles } from 'src/auth/role/roles.decorator';
 import { Role } from 'src/auth/role/roles.enum';
 import { v4 as uuidv4 } from 'uuid';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 
 // save file into storage
@@ -67,11 +66,18 @@ export class UserController {
     return this.userService.createUser(dto, file);
   }
 
-  //filter by role
+  //get all user filter by Name, Role
   @Get()
-  getUsers(@Query('role') filter: FilterUserDto){
-    if(filter){
-      return this.userService.getUserByFilter(filter)
+  @ApiQuery({ name: 'name', required: false })
+  @ApiQuery({ name: 'role', required: false })
+  getUsers(
+    @Query('name') name: string, 
+    @Query('role') role: string
+    ){
+    if(name){
+      return this.userService.getUserByName(name)
+    }else if(role){
+      return this.userService.getUserByRole(role)
     }else{
       return this.userService.getUsers()
     }

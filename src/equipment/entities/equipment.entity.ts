@@ -25,11 +25,11 @@ export class Equipment {
   violance: boolean;
 
   @Column({
-    type: 'timestamp',
+    type: 'date',
   })
   timestamp: Date;
 
-  @OneToOne(() => User)
+  @OneToOne(() => User, {onDelete: 'CASCADE'})
   @JoinColumn()
   user: User
 }

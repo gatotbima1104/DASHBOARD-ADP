@@ -124,11 +124,11 @@ export class UserService {
     return user
   }
 
-  // filter user
-  async getUserByFilter(filter: FilterUserDto){
+  // filter user by role
+  async getUserByRole(role: string){
     const builder = await this.userRepo.createQueryBuilder('user')
       .select('user')
-      .where('user.role = :role', {role: filter})
+      .where('user.role = :role', {role})
       .getMany()
 
       if(!builder){
@@ -142,5 +142,13 @@ export class UserService {
       }
 
     return builder
+  }
+
+  // filter user by name
+  async getUserByName(name: string){
+    return await this.userRepo.createQueryBuilder('user')
+      .select('user')
+      .where('user.name ILIKE :name', {name: `%${name}%`})
+      .getMany()
   }
 }
