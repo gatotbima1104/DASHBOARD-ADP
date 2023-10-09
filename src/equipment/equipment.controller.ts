@@ -1,7 +1,6 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { EquipmentService } from './equipment.service';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { FilterByEquipmentDto } from './dto/filter.equipment.dto';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 @ApiBearerAuth()
 @ApiTags('equipment')
@@ -11,26 +10,32 @@ export class EquipmentController {
 
   // get all done
   @Get()
-  getAll(){
-    return this.equipmentService.findAll()
+  @ApiQuery({ name: 'date', required: false })
+  @ApiQuery({ name: 'page', required: false })
+  getAll(@Query('page') page: number, @Query('date') date: string){
+    return this.equipmentService.findAllFilterByDate(page, date)
   }
 
   //filter By Date done
-  @Get('filter')
-  filterByDate(@Query('date') date: string){
-    return this.equipmentService.sortByDate(date)
-  }
-
-
-  // @Get()
-  // findAll(@Query('isSafe') isSafe: boolean, @Query('helm') helm: string) {
-  //   if(isSafe){
-  //     return this.equipmentService.getFilterUser(isSafe);
-  //   }else if(helm){
-  //     return this.equipmentService.getFilterEquipment(helm);
-  //   }else{
-  //     return this.equipmentService.findAll()
+  // @Get('filter')
+  // filterByDate(
+  // @Query('date') date: string,
+  // @Query('isSafe') isSafe: boolean,
+  // ){
+  //   if(date){
+  //     return this.equipmentService.sortByDate(date)
   //   }
+  //   return this.equipmentService.getFilterByisSafe(isSafe)
   // }
+
+  @Get('filter')
+  @ApiQuery({ name: 'violance', required: false })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'helm', required: false })
+  @ApiQuery({ name: 'boot', required: false })
+  @ApiQuery({ name: 'vest', required: false })
+  getAllFilterByEquipment(@Query('page') page: number, @Query('vest') vest: boolean, @Query('helm') helm: boolean, @Query('boot') boot: boolean, @Query('violance') violance: boolean){
+    return this.equipmentService.getFilterEquipment(page, vest, helm, boot, violance)
+  }
 
 }

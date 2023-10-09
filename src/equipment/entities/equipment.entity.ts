@@ -1,4 +1,4 @@
-import { User } from 'src/user/entities/user.entity';
+import { Track } from 'src/track/entity/track.entity';
 import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
@@ -22,6 +22,12 @@ export class Equipment {
     type: 'boolean',
     default: false,
   })
+  boot: boolean;
+
+  @Column({
+    type: 'boolean',
+    default: false,
+  })
   violance: boolean;
 
   @Column({
@@ -29,7 +35,7 @@ export class Equipment {
   })
   timestamp: Date;
 
-  @OneToOne(() => User, {onDelete: 'CASCADE'})
+  @OneToOne(() => Track, {onDelete: 'CASCADE'})
   @JoinColumn()
-  user: User
+  track: Track
 }
