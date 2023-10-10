@@ -35,13 +35,13 @@ export class EquipmentService {
   }
 
   // FILTER BY DATE
-  async sortByDate(date: string) {
-    return await this.equipRepo
-      .createQueryBuilder('equipment')
-      .select('equipment')
-      .where('DATE(equipment.timestamp) = :date', { date })
-      .getMany();
-  }
+  // async sortByDate(date: string) {
+  //   return await this.equipRepo
+  //     .createQueryBuilder('equipment')
+  //     .select('equipment')
+  //     .where('DATE(equipment.timestamp) = :date', { date })
+  //     .getMany();
+  // }
 
   // FILTER BY EQUIPMENT
   async getFilterEquipment(
@@ -92,13 +92,13 @@ export class EquipmentService {
   }
 
   // FILTER BY HELM
-  async filterByHelm(helm: boolean, vest: boolean) {
-    const query = this.equipRepo.createQueryBuilder('equipment');
+  // async filterByHelm(helm: boolean, vest: boolean) {
+  //   const query = this.equipRepo.createQueryBuilder('equipment');
 
-    if (helm) {
-      query.where('equipment.helm = :helm', { helm }).getMany();
-    } else if (vest) {
-      query.where('equipment.vest = :vest', { vest }).getMany();
-    }
-  }
+  //   if (helm) {
+  //     query.where('equipment.helm = :helm', { helm }).getMany();
+  //   } else if (vest) {
+  //     query.where('equipment.vest = :vest', { vest }).getMany();
+  //   }
+  // }
 }
