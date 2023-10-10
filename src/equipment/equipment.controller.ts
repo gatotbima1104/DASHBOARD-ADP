@@ -8,12 +8,17 @@ import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 export class EquipmentController {
   constructor(private readonly equipmentService: EquipmentService) {}
 
-  // get all done
+  // GET ALL, FILTER BY DATE, PAGINATION
   @Get()
   @ApiQuery({ name: 'date', required: false })
   @ApiQuery({ name: 'page', required: false })
   getAll(@Query('page') page: number, @Query('date') date: string){
     return this.equipmentService.findAllFilterByDate(page, date)
+  }
+
+  @Get('sort')
+  sortByEquip(@Query('helm') helm: boolean, @Query('vest') vest: boolean){
+    return this.equipmentService.filterByHelm(helm, vest)
   }
 
   //filter By Date done
@@ -29,13 +34,14 @@ export class EquipmentController {
   // }
 
   @Get('filter')
-  @ApiQuery({ name: 'violance', required: false })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'helm', required: false })
-  @ApiQuery({ name: 'boot', required: false })
   @ApiQuery({ name: 'vest', required: false })
+  @ApiQuery({ name: 'boot', required: false })
+  @ApiQuery({ name: 'violance', required: false })
   getAllFilterByEquipment(@Query('page') page: number, @Query('vest') vest: boolean, @Query('helm') helm: boolean, @Query('boot') boot: boolean, @Query('violance') violance: boolean){
     return this.equipmentService.getFilterEquipment(page, vest, helm, boot, violance)
   }
+
 
 }

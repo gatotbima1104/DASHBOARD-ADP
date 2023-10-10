@@ -11,7 +11,7 @@ export class EquipmentService {
     @InjectRepository(Track) private trackRepo: Repository<Track>,
   ) {}
 
-  // get all done
+  // GET ALL FILTER BY DATE, PAGINATION
   async findAllFilterByDate(page: number = 1, date: string) {
     const query = this.equipRepo.createQueryBuilder('equipment');
 
@@ -36,7 +36,7 @@ export class EquipmentService {
     };
   }
 
-  //filter by date done
+  // FILTER BY DATE
   async sortByDate(date: string) {
     return await this.equipRepo
       .createQueryBuilder('equipment')
@@ -45,19 +45,20 @@ export class EquipmentService {
       .getMany();
   }
 
+  // FILTER BY EQUIPMENT
   async getFilterEquipment(
     page: number = 1,
-    violance: boolean,
     helm: boolean,
     vest: boolean,
     boot: boolean,
+    violance: boolean,
   ) {
     const query = this.equipRepo.createQueryBuilder('equipment');
 
     if (helm) {
       query.where('equipment.helm = :helm', { helm });
     }
-    else if (vest) {
+    if (vest) {
       query.andWhere('equipment.vest = :vest', { vest });
     }
     if (boot) {
@@ -80,7 +81,7 @@ export class EquipmentService {
     };
   }
 
-  // get user by filter isSafe
+  // FILTER BY isSafe USER
   async getFilterByisSafe(isSafe: boolean) {
     return this.equipRepo
       .createQueryBuilder('track')
@@ -88,4 +89,22 @@ export class EquipmentService {
       .where('track.isSafe = :isSafe', { isSafe })
       .getMany();
   }
+
+  // FILTER BY HELM
+  async filterByHelm(helm: boolean, vest: boolean){
+    const query = this.equipRepo.createQueryBuilder('equipment')
+
+    if(helm){
+      query.where('equipment.helm = :helm', {helm })
+      .getMany()
+    }else if(vest){
+      query.where('equipment.vest = :vest', {vest })
+      .getMany()
+    }
+    
+  }
 }
+
+
+
+
