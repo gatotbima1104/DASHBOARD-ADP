@@ -13,17 +13,15 @@ export class EquipmentService {
 
   // GET ALL FILTER BY DATE, PAGINATION
   async findAllFilterByDate(page: number = 1, date: string) {
-    const query = this.equipRepo.createQueryBuilder('equipment');
+    const query = this.equipRepo
+      .createQueryBuilder('equipment')
+      .leftJoinAndSelect('equipment.track', 'track');
 
     if (date) {
       query.where('DATE(equipment.timestamp) = :date', { date });
     }
-    // const equipments = await this.equipRepo.find({
-    //   relations: ['track'],
-    //   take: 3,
-    //   skip: 3 * (page - 1),
-    // })
-    const pageSize = 3;
+
+    const pageSize = 10;
     const [records, total] = await query
       .orderBy('equipment.timestamp', 'DESC')
       .skip((page - 1) * pageSize)
@@ -57,18 +55,15 @@ export class EquipmentService {
 
     if (helm) {
       query.where('equipment.helm = :helm', { helm });
-    }
-    if (vest) {
+    } else if (vest) {
       query.andWhere('equipment.vest = :vest', { vest });
-    }
-    if (boot) {
+    } else if (boot) {
       query.andWhere('equipment.boot = :boot', { boot });
-    }
-    if (violance) {
+    } else if (violance) {
       query.andWhere('equipment.violance = :violance', { violance });
     }
 
-    const pageSize = 3;
+    const pageSize = 10;
     const [records, total] = await query
       .orderBy('equipment.timestamp', 'DESC')
       .skip((page - 1) * pageSize)
@@ -81,30 +76,29 @@ export class EquipmentService {
     };
   }
 
-  // FILTER BY isSafe USER
-  async getFilterByisSafe(isSafe: boolean) {
-    return this.equipRepo
-      .createQueryBuilder('track')
-      .select('track')
-      .where('track.isSafe = :isSafe', { isSafe })
-      .getMany();
+  // FILTER BY isSafe AND JABATAN TRACK-ID DONE
+  async getFilterByisSafe(isSafe: boolean, jabatan: string) {
+    const query = this.equipRepo
+      .createQueryBuilder('equipment')
+      .innerJoinAndSelect('equipment.track', 'track');
+
+    if (isSafe) {
+      query.where('track.isSafe = :isSafe', { isSafe });
+    } else if (jabatan) {
+      query.where('track.jabatan = :jabatan', { jabatan });
+    }
+
+    return query.getMany();
   }
 
   // FILTER BY HELM
-  async filterByHelm(helm: boolean, vest: boolean){
-    const query = this.equipRepo.createQueryBuilder('equipment')
+  async filterByHelm(helm: boolean, vest: boolean) {
+    const query = this.equipRepo.createQueryBuilder('equipment');
 
-    if(helm){
-      query.where('equipment.helm = :helm', {helm })
-      .getMany()
-    }else if(vest){
-      query.where('equipment.vest = :vest', {vest })
-      .getMany()
+    if (helm) {
+      query.where('equipment.helm = :helm', { helm }).getMany();
+    } else if (vest) {
+      query.where('equipment.vest = :vest', { vest }).getMany();
     }
-    
   }
 }
-
-
-
-

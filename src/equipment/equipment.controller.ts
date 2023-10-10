@@ -12,26 +12,20 @@ export class EquipmentController {
   @Get()
   @ApiQuery({ name: 'date', required: false })
   @ApiQuery({ name: 'page', required: false })
-  getAll(@Query('page') page: number, @Query('date') date: string){
-    return this.equipmentService.findAllFilterByDate(page, date)
+  getAll(@Query('page') page: number, @Query('date') date: string) {
+    return this.equipmentService.findAllFilterByDate(page, date);
   }
 
+  // SORT TRACK BY IS SAFE AND JABATAN
   @Get('sort')
-  sortByEquip(@Query('helm') helm: boolean, @Query('vest') vest: boolean){
-    return this.equipmentService.filterByHelm(helm, vest)
+  @ApiQuery({ name: 'isSafe', required: false })
+  @ApiQuery({ name: 'jabatan', required: false })
+  sortByEquip(
+    @Query('isSafe') isSafe: boolean,
+    @Query('jabatan') jabatan: string,
+  ) {
+    return this.equipmentService.getFilterByisSafe(isSafe, jabatan);
   }
-
-  //filter By Date done
-  // @Get('filter')
-  // filterByDate(
-  // @Query('date') date: string,
-  // @Query('isSafe') isSafe: boolean,
-  // ){
-  //   if(date){
-  //     return this.equipmentService.sortByDate(date)
-  //   }
-  //   return this.equipmentService.getFilterByisSafe(isSafe)
-  // }
 
   @Get('filter')
   @ApiQuery({ name: 'page', required: false })
@@ -39,9 +33,19 @@ export class EquipmentController {
   @ApiQuery({ name: 'vest', required: false })
   @ApiQuery({ name: 'boot', required: false })
   @ApiQuery({ name: 'violance', required: false })
-  getAllFilterByEquipment(@Query('page') page: number, @Query('vest') vest: boolean, @Query('helm') helm: boolean, @Query('boot') boot: boolean, @Query('violance') violance: boolean){
-    return this.equipmentService.getFilterEquipment(page, vest, helm, boot, violance)
+  getAllFilterByEquipment(
+    @Query('page') page: number,
+    @Query('helm') helm: boolean,
+    @Query('vest') vest: boolean,
+    @Query('boot') boot: boolean,
+    @Query('violance') violance: boolean,
+  ) {
+    return this.equipmentService.getFilterEquipment(
+      page,
+      helm,
+      vest,
+      boot,
+      violance,
+    );
   }
-
-
 }

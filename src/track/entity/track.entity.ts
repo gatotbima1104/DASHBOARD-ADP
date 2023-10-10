@@ -19,4 +19,5 @@ export class Track {
     default: false,
   })
   isSafe: boolean
+  
 }
