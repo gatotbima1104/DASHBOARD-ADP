@@ -25,7 +25,7 @@ export class MyGateway implements OnModuleInit{
 
         //SETTING UP TIMES SUBSCRIBEpublisher 
         setInterval( async () =>{
-          await subscriber.subscribe('coconut_video_stream_6530ec6352ebf15220e8d903', (message) => {
+          await subscriber.subscribe('', (message) => {
             console.log(message)
           })
           
