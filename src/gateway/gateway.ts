@@ -1,62 +1,99 @@
 import { OnModuleInit } from "@nestjs/common";
 import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from "@nestjs/websockets";
-import {Server, Socket} from 'socket.io'
+import { Server, Socket } from 'socket.io'
+import * as randomstring from 'randomstring'
+import * as redis from 'redis'
 
-@WebSocketGateway()
+@WebSocketGateway(3001, {
+  cors: {
+    origin: '*'
+  }
+})
 export class MyGateway implements OnModuleInit{
   @WebSocketServer()
   server: Server;
-  private connections: Map<string, Socket> = new Map();
-
-  onModuleInit() {
-    this.server.on('connection', (socket) => {
-      console.log('Connected')
-
-      const socketId = socket.id
-      console.log(`connected with ID: ${socketId}`)
-
-      const sockeSetted = this.connections.set(socketId, socket)
-      console.log(sockeSetted)
-    })
-  }
-
-  closeConnection(socketId: string) {
-    const socket = this.connections.get(socketId)
-    if(socket) {
-      socket.disconnect()
-      this.connections.delete(socketId)
-      console.log(`Close connection with ID: ${socket}`)
-    }else{
-      console.log(`Not found with ID : ${socket} `)
-    }
-  }
-
-  openConnection(socketId: string){
-    const socket = this.connections.get(socketId)
-    if(socket){
-      //TODOS LOGIC
-    }else{
-      console.log(`Not found with ID : ${socket} `)
-    }
-  }
   
+  onModuleInit() {
+      this.server.on('connection', (socket) => {
+        console.log('client ID: ', socket.id)      
+        
+        //PUBLISH REDIS
+        const publisher = redis.createClient()
+        //SUBSCIREB REDIS
+        const subscriber = publisher.duplicate()
+        await subscriber.connect()
 
-  @SubscribeMessage('liveTracking')
-  onTrack(@MessageBody() body: any){
-    console.log(body)
-    this.server.emit('onTracking', {
-      msg: "new message",
-      // content: body
-    })
-    
+        //SETTING UP TIMES SUBSCRIBEpublisher 
+        setInterval( async () =>{
+          await subscriber.subscribe('coconut_video_stream_6530ec6352ebf15220e8d903', (message) => {
+            console.log(message)
+          })
+          
+          const data = {
+            id: this.randomNumber(),
+            text: this.randomString(5)
+          }
+          //PUBLISHER REDIS
+          // await publisher.connect()
+          // await publisher.publish(
+          //   'data', JSON.stringify(data)
+          // )
+          console.log('data', data);
+          this.server.emit('updateData', data)
+        }, 5000)
+      })
   }
 
-  @SubscribeMessage('newMessage')
-  onNewMessage(@MessageBody() body: any){
+  randomNumber(){
+    return Math.floor(Math.random() * (50 - 5 + 1)) + 5
+  }
+
+  randomString(words: number){
+    return randomstring.generate(words)
+  }
+
+  // CHAT MESSAGE IS FOR SENDING MESSAGE
+  @SubscribeMessage("chatMessage")
+  onChatMessage(@MessageBody() body: any){
     console.log(body)
-    this.server.emit('onMessage', {
-      msg: "new message",
+    
+    // ONCHAT IS FOR LISTENING
+    this.server.emit("onChat", {  
       content: body
     })
   }
+
+  @SubscribeMessage('setAlarm')
+  onSetAlarm(@MessageBody() data: any, client: Socket): void {
+    console.log('Received data from client:', data);
+
+    if (data && data.timeout) {
+      const { timeout } = data;
+      // SET TIMEOUT ALARM
+      setTimeout(() => {
+        // client.emit('alarmRinging', { message: 'alarm ringing!!!' });
+        if (client) {
+          client.emit('alarmRinging', { message: 'alarm ringing!!!' });
+        } else {
+          console.log('Client object is undefined.');
+        }
+      }, timeout * 1000);
+    } else {
+      console.log('Invalid data received from client.');
+    }
+  }
+
+  @SubscribeMessage('random')
+  onRandom(@MessageBody() data: any){
+
+    setTimeout(()=>{
+      const sendRandom = () =>{
+        const random = Math.random()
+        
+        console.log(random)
+        this.server.emit('randomNumber', random)
+      }
+    }, 5000)
+  }
+
 }

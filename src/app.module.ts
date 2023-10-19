@@ -7,7 +7,7 @@ import { EquipmentModule } from './equipment/equipment.module';
 import typeOrmConfig from './config/database/typeorm.config';
 import { GatewayModule } from './gateway/gateway.module';
 import { TrackModule } from './track/track.module';
-
+import { MyGateway } from './gateway/gateway';
 
 @Module({
   imports: [TypeOrmModule.forRoot(typeOrmConfig) ,UserModule, AuthModule, EquipmentModule, GatewayModule, TrackModule],
