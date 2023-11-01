@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString, Matches, MaxLength, MinLength } from 'class-validator';
+import { IsEmail, IsEnum, IsString, Matches, MaxLength, MinLength } from 'class-validator';
+import { Role } from 'src/auth/role/roles.enum';
 
 export class CreateUserDto {
   @ApiProperty({
@@ -39,9 +40,9 @@ export class CreateUserDto {
   })
   confirmPassword: string;
 
+  @IsEnum(Role)
+  role: Role
 
-  // @IsString()
-  // profilePicture: string
   @ApiProperty({
     description: "The Image profile user",
     example: 'optional / .jpg/.jpeg/.png'

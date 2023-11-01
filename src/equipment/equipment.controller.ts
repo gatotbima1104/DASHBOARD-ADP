@@ -1,6 +1,16 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { EquipmentService } from './equipment.service';
-import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiProperty,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
+
+class FilterQuery {
+  @ApiProperty({ type: 'string', format: 'date-time', required: false })
+  date: string;
+}
 
 @ApiBearerAuth()
 @ApiTags('equipment')
@@ -10,8 +20,16 @@ export class EquipmentController {
 
   // GET ALL, FILTER BY DATE, PAGINATION
   @Get()
-  @ApiQuery({ name: 'date', required: false })
-  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({
+    name: 'date',
+    type: 'date-time',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'page',
+    type: 'number',
+    required: false,
+  })
   getAll(@Query('page') page: number, @Query('date') date: string) {
     return this.equipmentService.findAllFilterByDate(page, date);
   }
@@ -19,7 +37,7 @@ export class EquipmentController {
   // SORT TRACK BY IS SAFE AND JABATAN
   @Get('sort')
   @ApiQuery({ name: 'isSafe', required: false })
-  @ApiQuery({ name: 'jabatan', required: false })
+  @ApiQuery({ name: 'jabatan', required: false, enum: ['worker', 'operator'] })
   sortByEquip(
     @Query('isSafe') isSafe: boolean,
     @Query('jabatan') jabatan: string,

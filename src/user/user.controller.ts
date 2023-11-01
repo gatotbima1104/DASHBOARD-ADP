@@ -26,6 +26,8 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
+import fs from 'fs';
+import { imageFileFilter } from './interceptor/image.filter';
 
 // MAKE SAVING FUNCTION INTO STORAGE ./UPLOADS
 export const storage = {
@@ -39,6 +41,7 @@ export const storage = {
       cb(null, `${filename}${extention}`);
     },
   }),
+  fileFilter: imageFileFilter,
 };
 
 @ApiTags('user')
@@ -63,41 +66,41 @@ export class UserController {
           type: 'string',
           format: 'binary',
         },
+        role: {
+          enum: ['admin', 'worker'],
+        },
       },
     },
   })
   @UseInterceptors(FileInterceptor('profilePicture', storage))
-  createUser(
+  // @UseInterceptors(FileInterceptor)
+  async createUser(
     @Body() dto: CreateUserDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.userService.createUser(dto, file);
-  }
+    try {
+      const createdUser = await this.userService.createUser(dto, file);
+      return createdUser;
+    } catch (error) {
+      console.log(error);
 
-  // GET ALL, FILTER BY NAME, ROLE
-  // @Get()
-  // @ApiQuery({ name: 'name', required: false })
-  // @ApiQuery({ name: 'role', required: false })
-  // getUsers(@Query('name') name: string, @Query('role') role: string) {
-  //   if (name) {
-  //     return this.userService.getUserByName(name);
-  //   } else if (role) {
-  //     return this.userService.getUserByRole(role);
-  //   } else {
-  //     return this.userService.getUsers();
-  //   }
-  // }
+      if (file) {
+        fs.unlinkSync(file.path);
+      }
+      throw error;
+    }
+  }
 
   // GET ALL USERS
   @Get()
-  getUsers(){
-    return this.userService.getUsers()
+  getUsers() {
+    return this.userService.getUsers();
   }
 
   // GET BY FILTER NAME, ROLE
   @Get('filter')
   @ApiQuery({ name: 'name', required: false })
-  @ApiQuery({ name: 'role', required: false })
+  @ApiQuery({ name: 'role', required: false, enum: ['admin', 'worker'] })
   getUsersFilter(@Query('name') name: string, @Query('role') role: string) {
     if (name) {
       return this.userService.getUserByName(name);
@@ -105,13 +108,13 @@ export class UserController {
       return this.userService.getUserByRole(role);
     }
   }
-  
+
   // GET BY ID USER
   @Get(':id')
   getUsersById(@Param('id') id: string) {
     return this.userService.getUser(id);
   }
-  
+
   // EDIT BY ID USER
   @Patch(':id')
   @Roles(Role.Admin)
@@ -130,6 +133,7 @@ export class UserController {
     },
   })
   @UseInterceptors(FileInterceptor('profilePicture', storage))
+  // @UseInterceptors(FileInterceptor)
   updateUser(
     @Param('id') id: string,
     @Body() dto: EditUserDto,
@@ -145,25 +149,12 @@ export class UserController {
     return this.userService.removeUserById(id);
   }
 
-  /// STILL GETTING ERRORS HERE
-
-  // @Get()
-  // getAllUsers(){
-  //   return this.userService.getUsers()
+  // // GET IMAGES
+  // @Get(':profilePicture')
+  // getImageById(@Param('profilePicture') profilePicture: string, @Res() res){
+  //   // const filePath = `./uploads/${profilePicture}`
+  //     return res.sendFile(profilePicture, {
+  //       root: './uploads'
+  //     })
   // }
-
-  // @Get('search')
-  // @ApiQuery({name: 'role', required: false})
-  // @ApiQuery({name: 'name', required: false})
-  // getUserByFilter(@Query('role') role: string,
-  // @Query('name') name: string,
-  // ){
-  //   return role? this.userService.getUserByRole(role) : this.userService.getUserByName(name)
-  // }
-
-  // @Get('search')
-  // getUserFilterByName(@Query('name') name: string){
-  //   return this.userService.getUserByName(name)
-  // }
-
 }

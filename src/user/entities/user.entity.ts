@@ -1,5 +1,5 @@
 import { Role } from 'src/auth/role/roles.enum'
-import {Column, Entity, OneToOne, PrimaryGeneratedColumn} from 'typeorm'
+import {Column, Entity, PrimaryGeneratedColumn} from 'typeorm'
 
 @Entity()
 export class User{

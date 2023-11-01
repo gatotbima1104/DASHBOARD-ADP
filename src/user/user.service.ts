@@ -45,10 +45,7 @@ export class UserService {
       );
     }
     
-    // Create a new user entity
     const newUser = this.userRepo.create({
-      // name: dto.name,
-      // email: dto.email,
       ...dto,
       password: hashPassword,
       profilePicture: profilePicture,
@@ -65,7 +62,14 @@ export class UserService {
 
   // done
   async getUsers(){
-    return await this.userRepo.find()
+    return await this.userRepo.find({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true
+      }
+    })
   }
 
   // done
@@ -91,7 +95,6 @@ export class UserService {
       message: 'user updated successfully'
     }
   }
-
   // done
   async removeUserById(id: string){
     const user = await this.userRepo.delete(id)
@@ -120,6 +123,10 @@ export class UserService {
         HttpStatus.NOT_FOUND,
       );
     }
+
+    delete user.password
+    delete user.profilePicture
+    
     return user
   }
 

@@ -4,14 +4,14 @@ import { IsEmail, IsString, MaxLength, MinLength } from 'class-validator';
 export class LoginUserDto {
   @ApiProperty({
     description: "The email of user",
-    example: 'eta@gmail.com'
+    example: 'super@admin.com'
   })
   @IsEmail()
   email: string;
 
   @ApiProperty({
     description: "The password of user",
-    example: 'Mareta123'
+    example: 'Superadmin123'
   })
   @IsString()
   @MinLength(8)

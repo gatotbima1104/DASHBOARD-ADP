@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString, Matches, MaxLength, MinLength } from 'class-validator';
+import { IsEmail, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class EditUserDto {
   @ApiProperty({
@@ -18,15 +18,6 @@ export class EditUserDto {
   @IsEmail()
   email: string;
 
-  // @IsString()
-  // position: string
-
-  // @IsString()
-  // @MinLength(8)
-  // @MaxLength(20)
-  // password: string;
-
-  // @FileInterceptor('profilePicture') // 'profilePicture' should match the field name in your HTML form
   @ApiProperty({
     description: "The Image profile user",
     example: 'optional / .jpg/.jpeg/.png'
