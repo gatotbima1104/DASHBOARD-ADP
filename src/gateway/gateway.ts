@@ -2,7 +2,6 @@ import { OnModuleInit } from "@nestjs/common";
 import { SubscribeMessage, WebSocketGateway, WebSocketServer } from "@nestjs/websockets";
 import { Server } from 'socket.io'
 import * as redis from 'redis'
-import { GatewayService } from "./gateway.service";
 
 @WebSocketGateway(3001, {
   cors: {
@@ -27,7 +26,8 @@ export class MyGateway implements OnModuleInit{
       console.log(`Connect to ID : ${socket.id}`)
     })
     //subs a channel 
-    this.subsForwardToFrontend(process.env.REDIS_CHANNEL)  // replace with your channel
+    this.subsForwardToFrontend(process.env.REDIS_CHANNEL, process.env.REDIS_CHANNEL2)  // replace with your channel
+    // this.subsSecondChannel(process.env.REDIS_CHANNEL2)  // replace with your channel
 
     // subs more than a channel
     // const moreChannel = [process.env.REDIS_CHANNEL, process.env.REDIS_CHANNEL2]
@@ -35,18 +35,18 @@ export class MyGateway implements OnModuleInit{
   }
 
   // subs redis - bridge to socket .io
-  async subsForwardToFrontend (channel: string) {
+  async subsForwardToFrontend (channel: string, channel2: string) {
     await this.subscriber.connect()  // connect to redis server
-    
     try {
-      // const subscriber = redis.createClient()
-      // await subscriber.connect()
       this.subscriber.subscribe(channel, (message: any) => {
         console.log(message)
-        this.server.emit(`${channel}`, { message })  // forward to frontend channel Socket.io
+        this.server.emit(`${channel}`, { image: true, buffer: message.toString('base64') })  // forward to frontend channel Socket.io
       })
-
-      console.log(`subscribed to channel: ${channel}`)
+      this.subscriber.subscribe(channel2, (message: any) => {
+        console.log(message)
+        this.server.emit(`${channel2}`, { buffer: message.toString('base64') })  // forward to frontend channel2 Socket.io
+      })
+      console.log(`subscribed to channel2: ${channel} and ${channel2}`)
     } catch (error) {
       console.log('error connecting to Redis', error.message)
     }
