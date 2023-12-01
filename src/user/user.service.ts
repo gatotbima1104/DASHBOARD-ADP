@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create.user.dto';
 import * as bcrypt from 'bcrypt';
 import { EditUserDto } from './dto/update.user.dto';
+import * as fs from 'fs'
 
 @Injectable()
 export class UserService {
@@ -33,7 +34,7 @@ export class UserService {
     const hashPassword = await bcrypt.hash(dto.password, salt)
 
     //add images
-    const profilePicture = file? file.originalname : null;
+    const profilePicture = file? process.env.IMAGE_URL+file.filename : null;
 
     if(dto.confirmPassword !== dto.password){
       throw new HttpException(
@@ -67,7 +68,8 @@ export class UserService {
         id: true,
         name: true,
         email: true,
-        role: true
+        role: true,
+        profilePicture: true
       }
     })
   }
@@ -97,7 +99,21 @@ export class UserService {
   }
   // done
   async removeUserById(id: string){
+
+    const image = await this.userRepo.findOneBy({id})
+    try {
+      await fs.unlink(`.${image.profilePicture.replace(process.env.IMAGE_URL, '/uploads/')}`, (err)=> {
+        if(err){
+          console.log(err)
+          return err
+        }
+      })
+    } catch (error) {
+      // console.log(error)
+    }
+
     const user = await this.userRepo.delete(id)
+    
     if(user.affected == 0){
       throw new HttpException(
         {

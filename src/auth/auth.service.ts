@@ -107,7 +107,14 @@ export class AuthService {
 
     const token = this.jwtService.sign(payload);
 
+    // delete user.password
+    // delete user.name
+    // delete user.profilePicture
+
+    const { password, name, profilePicture, ...cleanUser} = user
+
     return {
+      user: cleanUser,
       token,
       message: 'Logged in successfully',
     };

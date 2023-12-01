@@ -23,7 +23,7 @@ export class MyGateway implements OnModuleInit{
   onModuleInit() {
     console.log('onModuleInit triggered')
     this.server.on('connection', (socket)=> {
-      console.log(`Connect to ID : ${socket.id}`)
+      // console.log(`Connect to ID : ${socket.id}`)
     })
     //subs a channel 
     this.subsForwardToFrontend(process.env.REDIS_CHANNEL, process.env.REDIS_CHANNEL2)  // replace with your channel
@@ -36,8 +36,8 @@ export class MyGateway implements OnModuleInit{
 
   // subs redis - bridge to socket .io
   async subsForwardToFrontend (channel: string, channel2: string) {
-    await this.subscriber.connect()  // connect to redis server
     try {
+      await this.subscriber.connect()  // connect to redis server
       this.subscriber.subscribe(channel, (message: any) => {
         console.log(message)
         this.server.emit(`${channel}`, { image: true, buffer: message.toString('base64') })  // forward to frontend channel Socket.io
