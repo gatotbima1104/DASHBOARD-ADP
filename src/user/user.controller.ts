@@ -26,7 +26,7 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import fs from 'fs';
+import * as fs from 'fs';
 import { imageFileFilter } from './interceptor/image.filter';
 
 // MAKE SAVING FUNCTION INTO STORAGE ./UPLOADS
@@ -83,9 +83,15 @@ export class UserController {
       return createdUser;
     } catch (error) {
       console.log(error);
+      console.log(file.path)
 
       if (file) {
-        fs.unlinkSync(file.path);
+        await fs.unlink(`./${file.path}`, (err) => {
+          if(err){
+            console.log(err);
+            return err
+          }
+        });
       }
       throw error;
     }

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString, MaxLength, MinLength } from 'class-validator';
+import { IsEmail, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class EditUserDto {
   @ApiProperty({
@@ -9,6 +9,7 @@ export class EditUserDto {
   @IsString()
   @MinLength(6)
   @MaxLength(20)
+  @IsOptional()
   name: string;
 
   @ApiProperty({
@@ -16,11 +17,14 @@ export class EditUserDto {
     example: 'james@gmail.com'
   })
   @IsEmail()
+  @IsOptional()
   email: string;
 
   @ApiProperty({
     description: "The Image profile user",
     example: 'optional / .jpg/.jpeg/.png'
   })
-  profilePicture?: Express.Multer.File; // This is correctly typed for file uploads
+  @IsOptional()
+  // profilePicture?: Express.Multer.File; // This is correctly typed for file uploads
+  profilePicture?: string; // This is correctly typed for file uploads
 }

@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
@@ -81,20 +81,40 @@ export class UserService {
 
   // done
   async editUserById(id: string, dto: EditUserDto, file: Express.Multer.File){
-    const oldUser = await this.findUserById(id)
+    try{
+      if(Object.keys(dto).length === 0 && !file){
+        throw new BadRequestException('Must change at least 1 property')
+      }
+      
+      let userDetails = {...dto}
+      if(file){
+        const user = await this.getUser(id)
+        await fs.unlink(`.${user.profilePicture.replace(process.env.IMAGE_URL, '/uploads/')}`, (err)=> {
+          if(err){
+            console.log(err)
+            return err
+          }
+        })
+        userDetails.profilePicture = `${process.env.IMAGE_URL}${file.filename}`
+      }
 
-    const profilePicture = file? file.originalname : null;
+      const result = await this.userRepo.update(id, {...userDetails})
 
-    await this.userRepo.update(id, {
-      ...oldUser,
-      ...dto,
-      profilePicture: profilePicture,
-    })
+      // const updatedUser = await this.userRepo.findOneBy({id})
 
-    const updatedUser = await this.userRepo.findOneBy({id})
-    return{
-      updatedUser,
-      message: 'user updated successfully'
+      if(result.affected === 0){
+        throw new NotFoundException(`User with id ${id} is not found`)
+      }
+      return{
+        // updatedUser,
+        message: 'user updated successfully'
+      }
+    }
+    catch(err){
+      console.log(err)
+      return {
+        error: err
+      }
     }
   }
   // done
@@ -141,7 +161,7 @@ export class UserService {
     }
 
     delete user.password
-    delete user.profilePicture
+    // delete user.profilePicture
     
     return user
   }
